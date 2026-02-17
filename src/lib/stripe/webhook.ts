@@ -1,5 +1,5 @@
 import Stripe from 'stripe'
-import { stripe } from './client'
+import { getStripe } from './client'
 import type { CheckoutMetadata } from './types'
 
 /**
@@ -14,7 +14,7 @@ export function constructWebhookEvent(
     throw new Error('STRIPE_WEBHOOK_SECRET is not set')
   }
 
-  return stripe.webhooks.constructEvent(payload, signature, webhookSecret)
+  return getStripe().webhooks.constructEvent(payload, signature, webhookSecret)
 }
 
 /**

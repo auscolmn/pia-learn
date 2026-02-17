@@ -1,5 +1,5 @@
 import Stripe from 'stripe'
-import { stripe } from './client'
+import { getStripe } from './client'
 import type { CreateCheckoutParams, CheckoutSessionResult, CheckoutMetadata } from './types'
 
 const PLATFORM_FEE_PERCENT = 10 // 10% platform fee
@@ -65,7 +65,7 @@ export async function createCourseCheckout(
     }
   }
 
-  const session = await stripe.checkout.sessions.create(sessionParams)
+  const session = await getStripe().checkout.sessions.create(sessionParams)
 
   if (!session.url) {
     throw new Error('Failed to create checkout session URL')
@@ -81,7 +81,7 @@ export async function createCourseCheckout(
  * Retrieve a checkout session by ID
  */
 export async function getCheckoutSession(sessionId: string) {
-  return stripe.checkout.sessions.retrieve(sessionId, {
+  return getStripe().checkout.sessions.retrieve(sessionId, {
     expand: ['payment_intent', 'customer'],
   })
 }

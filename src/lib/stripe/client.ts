@@ -21,8 +21,9 @@ export function getStripe(): Stripe {
   return _stripe
 }
 
-// Alias for convenience
-export { getStripe as stripe }
+// Export the getter as 'stripe' for convenience in usage
+// Usage: const result = await stripe().checkout.sessions.create(...)
+export const stripe = getStripe
 
 // Publishable key for client-side usage
 export const getPublishableKey = () => {

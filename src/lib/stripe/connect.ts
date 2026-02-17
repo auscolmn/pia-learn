@@ -1,4 +1,4 @@
-import { stripe } from './client'
+import { getStripe } from './client'
 import type { ConnectAccountStatus, CreateConnectAccountParams, ConnectOnboardingParams } from './types'
 
 /**
@@ -9,7 +9,7 @@ export async function createConnectAccount(
 ): Promise<string> {
   const { orgId, orgName, email, country = 'AU' } = params
 
-  const account = await stripe.accounts.create({
+  const account = await getStripe().accounts.create({
     type: 'express',
     country,
     email,
@@ -37,7 +37,7 @@ export async function createOnboardingLink(
 ): Promise<string> {
   const { accountId, refreshUrl, returnUrl } = params
 
-  const accountLink = await stripe.accountLinks.create({
+  const accountLink = await getStripe().accountLinks.create({
     account: accountId,
     refresh_url: refreshUrl,
     return_url: returnUrl,
@@ -53,7 +53,7 @@ export async function createOnboardingLink(
 export async function getAccountStatus(
   accountId: string
 ): Promise<ConnectAccountStatus> {
-  const account = await stripe.accounts.retrieve(accountId)
+  const account = await getStripe().accounts.retrieve(accountId)
 
   return {
     accountId: account.id,
@@ -68,7 +68,7 @@ export async function getAccountStatus(
  * Create a login link for the Express dashboard
  */
 export async function createDashboardLink(accountId: string): Promise<string> {
-  const loginLink = await stripe.accounts.createLoginLink(accountId)
+  const loginLink = await getStripe().accounts.createLoginLink(accountId)
   return loginLink.url
 }
 

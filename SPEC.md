@@ -1,73 +1,61 @@
-# PIA Learn — Education Hub
+# LearnStudio — Multi-Tenant LMS Platform
 
 ## Overview
 
-Online education platform for Psychedelic Institute Australia. Professional training courses for practitioners entering the psychedelic-assisted therapy space.
+A white-label online education platform (like Teachable/Thinkific) that organizations can use to host their courses. Built as a SaaS product.
 
-## Core Functions
+**First Client:** Psychedelic Institute Australia (PIA)
 
-### For Learners (Students)
-- Browse & enroll in courses
-- Watch video lessons
-- Download resources (PDFs, guides)
-- Take quizzes/assessments
-- Track progress across courses
-- Earn certificates upon completion
-- Access community/discussion forums
-- View CPD points earned
+## Business Model
 
-### For Instructors
-- Upload video content
-- Create course structure (modules → lessons)
-- Add resources/downloads
-- Create quizzes with auto-grading
-- View student progress
-- Respond to discussions
-
-### For Admins (PIA Team)
-- Manage all courses & content
-- Manage users (students, instructors)
-- View revenue & payments
-- Issue/revoke certificates
-- Analytics dashboard
-- Manage discount codes/promotions
-
-### Ecosystem Integration
-- Graduates auto-verified in AP Connect ("PIA Trained" badge)
-- Certificate validation API
-- CPD tracking for AHPRA compliance
-- SSO across PIA properties
+- **Platform:** LearnStudio (you own it)
+- **Tenants:** Organizations (PIA, others)
+- **Revenue:** Per-tenant subscription or revenue share
 
 ---
 
-## User Flows
+## Architecture: Multi-Tenant
 
-### Student Journey
-```
-1. Discover → Landing page / course catalog
-2. Browse → Course details, curriculum preview
-3. Purchase → Stripe checkout
-4. Learn → Video lessons, progress tracking
-5. Assess → Quizzes, assignments
-6. Complete → Certificate issued
-7. Connect → Listed on AP Connect with badge
-```
+### Tenant Isolation
+- Each organization has isolated data
+- Custom branding per tenant
+- Custom domain support (learn.pia.com.au)
+- Separate student pools
 
-### Instructor Flow
-```
-1. Login → Instructor dashboard
-2. Create → New course wizard
-3. Build → Add modules, lessons, videos
-4. Publish → Review & go live
-5. Monitor → Student progress, Q&A
-```
+### User Roles (Platform Level)
+- **Super Admin:** Platform owner (you)
+- **Org Admin:** Organization administrators
+- **Instructor:** Course creators within an org
+- **Student:** Learners enrolled in org courses
 
-### Admin Flow
-```
-1. Overview → Dashboard (revenue, enrollments, completion rates)
-2. Manage → Courses, users, certificates
-3. Configure → Pricing, promotions, settings
-```
+---
+
+## Core Features
+
+### For Organizations (Tenants)
+- Create and manage courses
+- Upload video content
+- Build quizzes/assessments
+- Issue certificates
+- Manage students
+- View analytics
+- Custom branding (logo, colors, domain)
+- Stripe Connect for payments
+
+### For Students
+- Browse org's course catalog
+- Purchase/enroll in courses
+- Watch video lessons
+- Track progress
+- Take quizzes
+- Download certificates
+- Community/discussions
+
+### For Platform Admin (You)
+- Manage all organizations
+- Platform analytics
+- Billing management
+- Feature flags per org
 
 ---
 
@@ -75,171 +63,174 @@ Online education platform for Psychedelic Institute Australia. Professional trai
 
 ### Stack
 - **Frontend:** Next.js 15 (App Router)
-- **Styling:** Tailwind CSS + shadcn/ui
+- **Styling:** Tailwind CSS + shadcn/ui (Enrol Studio branding)
 - **Backend:** Supabase (Auth, Database, Storage)
-- **Payments:** Stripe (subscriptions + one-time)
-- **Video:** Mux or Bunny.net (HLS streaming, DRM)
-- **Email:** Buttondown API or Resend
+- **Payments:** Stripe Connect (multi-tenant)
+- **Video:** Mux or Bunny.net
 - **Hosting:** Vercel
 
-### Database Schema (Core Tables)
+### Database Schema (Multi-Tenant)
+
 ```
+organizations
+  - id, name, slug
+  - logo_url, primary_color, custom_css
+  - custom_domain
+  - stripe_account_id
+  - plan (free/pro/enterprise)
+  - created_at
+
+org_members
+  - id, org_id, user_id
+  - role (admin/instructor)
+  - created_at
+
 users
-  - id, email, name, role (student/instructor/admin)
-  - avatar_url, bio
+  - id, email, name, avatar_url
   - created_at
 
 courses
-  - id, title, slug, description
-  - instructor_id, thumbnail_url
+  - id, org_id, title, slug
+  - description, thumbnail_url
+  - instructor_id
   - price, currency
-  - status (draft/published/archived)
-  - created_at, published_at
+  - status (draft/published)
+  - created_at
 
 modules
   - id, course_id, title, order
-  
+
 lessons
   - id, module_id, title, order
   - type (video/text/quiz)
   - video_url, content, duration
-  - is_free_preview
+  - is_preview
 
 enrollments
-  - id, user_id, course_id
-  - status (active/completed/refunded)
-  - progress_percent
+  - id, org_id, user_id, course_id
+  - status, progress_percent
   - enrolled_at, completed_at
 
 lesson_progress
   - id, enrollment_id, lesson_id
-  - completed, completed_at
-  - watch_time
+  - completed, watch_time
 
-quizzes
-  - id, lesson_id, title
-  - passing_score
-
-quiz_questions
-  - id, quiz_id, question, type
-  - options (JSON), correct_answer
-
-quiz_attempts
-  - id, user_id, quiz_id
-  - score, passed, completed_at
+quizzes / quiz_questions / quiz_attempts
+  (same as before, scoped to org)
 
 certificates
-  - id, user_id, course_id
+  - id, org_id, user_id, course_id
   - certificate_number
   - issued_at, pdf_url
 ```
 
-### API Endpoints
+### URL Structure
+
 ```
-/api/courses - List, create courses
-/api/courses/[slug] - Get course details
-/api/courses/[slug]/enroll - Enroll (Stripe)
-/api/lessons/[id] - Get lesson content
-/api/lessons/[id]/complete - Mark complete
-/api/quizzes/[id]/submit - Submit quiz
-/api/certificates/[id] - Get certificate
-/api/certificates/verify - Public validation
+# Platform (main site)
+learnstudio.com              → Marketing site
+learnstudio.com/login        → Platform login
+learnstudio.com/admin        → Platform admin
+
+# Tenant Sites (subdomains or custom domains)
+pia.learnstudio.com          → PIA's course site
+learn.pia.com.au             → PIA custom domain
+pia.learnstudio.com/courses  → PIA course catalog
+pia.learnstudio.com/admin    → PIA org admin
 ```
 
 ---
 
 ## Pages Structure
 
+### Platform (learnstudio.com)
 ```
-/                     → Landing page
+/                     → Marketing landing page
+/pricing              → Plans for organizations
+/login                → Platform login
+/register             → New org signup
+/admin                → Super admin dashboard
+/admin/orgs           → Manage organizations
+/admin/billing        → Platform revenue
+```
+
+### Tenant Site (org.learnstudio.com)
+```
+/                     → Org landing/catalog
 /courses              → Course catalog
-/courses/[slug]       → Course details + curriculum
-/courses/[slug]/learn → Learning interface (enrolled)
+/courses/[slug]       → Course details
+/courses/[slug]/learn → Learning interface
 /dashboard            → Student dashboard
-/dashboard/courses    → My enrolled courses
-/dashboard/certificates → My certificates
-
-/instructor           → Instructor dashboard
-/instructor/courses   → Manage courses
-/instructor/courses/new → Create course
-/instructor/courses/[id]/edit → Edit course
-
-/admin                → Admin dashboard
-/admin/users          → Manage users
-/admin/courses        → All courses
-/admin/certificates   → Certificate management
-/admin/analytics      → Platform analytics
+/admin                → Org admin dashboard
+/admin/courses        → Manage courses
+/admin/courses/new    → Course builder
+/admin/students       → Student management
+/admin/settings       → Org branding settings
 ```
-
----
-
-## Design Direction
-
-- **Aesthetic:** Warm professional (matches AP Connect)
-- **Colors:** Teal primary + cream background + gold accents
-- **Typography:** Instrument Serif headings + Plus Jakarta Sans body
-- **Feel:** Premium education, not generic LMS
 
 ---
 
 ## Implementation Phases
 
-### Phase 1: Foundation (Week 1-2)
-- [ ] Project setup (Next.js, Supabase, Tailwind)
-- [ ] Auth system (login, register, roles)
-- [ ] Database schema
-- [ ] Landing page
-- [ ] Course catalog (list view)
-- [ ] Course detail page
+### Phase 1: Foundation
+- [ ] Project setup (match Enrol Studio branding)
+- [ ] Multi-tenant database schema
+- [ ] Organization CRUD
+- [ ] Auth with org context
+- [ ] Platform landing page
+- [ ] Tenant routing (subdomains)
 
-### Phase 2: Enrollment & Payments (Week 2-3)
-- [ ] Stripe integration
-- [ ] Checkout flow
-- [ ] Enrollment management
-- [ ] Student dashboard
+### Phase 2: Org Admin
+- [ ] Org admin dashboard
+- [ ] Branding settings
+- [ ] Team management (invite instructors)
 
-### Phase 3: Learning Experience (Week 3-4)
-- [ ] Video player (Mux/Bunny integration)
-- [ ] Lesson progress tracking
-- [ ] Course navigation
-- [ ] Resource downloads
+### Phase 3: Course Builder
+- [ ] Course CRUD
+- [ ] Module/lesson editor
+- [ ] Video upload (Mux/Bunny)
+- [ ] Quiz builder
 
-### Phase 4: Assessments & Certificates (Week 4-5)
-- [ ] Quiz builder (admin)
-- [ ] Quiz taking (student)
-- [ ] Auto-grading
-- [ ] Certificate generation (PDF)
-- [ ] Certificate verification API
+### Phase 4: Student Experience
+- [ ] Org landing page (catalog)
+- [ ] Course enrollment
+- [ ] Video player + progress
+- [ ] Quiz taking
+- [ ] Certificates
 
-### Phase 5: Instructor Tools (Week 5-6)
-- [ ] Instructor dashboard
-- [ ] Course builder wizard
-- [ ] Video upload
-- [ ] Analytics per course
+### Phase 5: Payments
+- [ ] Stripe Connect setup
+- [ ] Org onboarding flow
+- [ ] Course purchases
+- [ ] Revenue split
 
-### Phase 6: Admin & Polish (Week 6-7)
-- [ ] Admin dashboard
-- [ ] User management
-- [ ] Revenue reports
-- [ ] AP Connect integration
-- [ ] Performance optimization
+### Phase 6: Polish
+- [ ] Custom domains
+- [ ] Analytics
+- [ ] Mobile optimization
+- [ ] PIA launch
 
 ---
 
-## Success Metrics
+## Design System
 
-- Course completion rate > 70%
-- Student satisfaction > 4.5/5
-- Certificate verification API uptime 99.9%
-- Page load < 2s
+**Match Enrol Studio branding:**
+- Primary: Indigo #6366F1
+- Secondary: Light Indigo #818CF8
+- CTA: Emerald #10B981
+- Background: Soft Purple #F5F3FF
+- Text: Dark Indigo #1E1B4B
+
+**Typography:**
+- Plus Jakarta Sans (body)
+- Consistent with Enrol Studio
 
 ---
 
-## Future Features (Post-Launch)
+## First Client: PIA
 
-- Live cohort-based courses
-- Discussion forums
-- Mobile app
-- SCORM support
-- Enterprise/team licenses
-- Integration with external CPD systems
+**Setup for PIA:**
+- Org slug: `pia`
+- Custom domain: `learn.psychedelicinstitute.com.au`
+- Branding: PIA colors (teal/cream)
+- Integration: AP Connect (graduate badges)

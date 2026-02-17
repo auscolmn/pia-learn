@@ -1,31 +1,24 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Instrument_Serif } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-sans",
   subsets: ["latin"],
-  display: "swap",
-});
-
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-display",
-  subsets: ["latin"],
-  weight: "400",
-  style: ["normal", "italic"],
+  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "PIA Learn | Psychedelic Institute Australia",
-  description: "Professional training courses for psychedelic-assisted therapy practitioners. Accredited education from Australia's leading psychedelic medicine institute.",
-  keywords: ["psychedelic training", "psilocybin course", "MDMA therapy training", "PAT certification", "psychedelic medicine education", "Australia"],
+  title: "Enrol Studio | Create and Sell Online Courses",
+  description: "The all-in-one platform for creators and educators to build, host, and sell professional online courses. Beautiful course builder, video hosting, payments, and certificates.",
+  keywords: ["online courses", "course builder", "sell courses", "video hosting", "LMS", "e-learning platform", "course creator"],
   openGraph: {
-    title: "PIA Learn | Professional Psychedelic Training",
-    description: "Accredited courses for practitioners entering the psychedelic-assisted therapy space.",
-    url: "https://learn.psychedelicinstitute.com.au",
-    siteName: "PIA Learn",
-    locale: "en_AU",
+    title: "Enrol Studio | Create and Sell Online Courses",
+    description: "The all-in-one platform for creators and educators to build, host, and sell professional online courses.",
+    url: "https://enrolstudio.com",
+    siteName: "Enrol Studio",
+    locale: "en_US",
     type: "website",
   },
 };
@@ -37,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${plusJakarta.variable} ${instrumentSerif.variable} font-sans antialiased`}>
+      <body className={`${plusJakarta.variable} font-sans antialiased`}>
         {children}
       </body>
     </html>

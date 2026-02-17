@@ -46,7 +46,7 @@ export function CourseEditor({ course, orgSlug }: CourseEditorProps) {
       </TabsContent>
 
       <TabsContent value="curriculum">
-        <CourseCurriculum course={course} />
+        <CourseCurriculum course={course} orgId={course.org_id} />
       </TabsContent>
 
       <TabsContent value="settings">

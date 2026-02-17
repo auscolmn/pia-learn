@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import {
   Dialog,
   DialogContent,
@@ -16,8 +16,9 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { createLesson, updateLesson } from '@/lib/courses/actions'
-import { Loader2, Video, FileText, HelpCircle } from 'lucide-react'
+import { Loader2, Video, FileText, HelpCircle, Clock } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { VideoUploader } from '@/components/video'
 import type { Lesson, LessonType } from '@/lib/supabase/types'
 import { cn } from '@/lib/utils'
 
@@ -26,6 +27,7 @@ interface LessonDialogProps {
   onOpenChange: (open: boolean) => void
   moduleId: string | null
   lesson: Lesson | null
+  orgId: string
   onSuccess: () => void
 }
 
@@ -39,7 +41,8 @@ export function LessonDialog({
   open, 
   onOpenChange, 
   moduleId, 
-  lesson, 
+  lesson,
+  orgId,
   onSuccess 
 }: LessonDialogProps) {
   const router = useRouter()
@@ -51,6 +54,7 @@ export function LessonDialog({
   const [description, setDescription] = useState('')
   const [content, setContent] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
+  const [videoPath, setVideoPath] = useState<string | null>(null)
   const [duration, setDuration] = useState('')
   const [isPreview, setIsPreview] = useState(false)
   const [isRequired, setIsRequired] = useState(true)
@@ -65,6 +69,7 @@ export function LessonDialog({
       setDescription(lesson?.description ?? '')
       setContent(lesson?.content ?? '')
       setVideoUrl(lesson?.video_url ?? '')
+      setVideoPath(lesson?.video_id ?? null) // video_id stores the path for supabase
       setDuration(lesson?.duration?.toString() ?? '')
       setIsPreview(lesson?.is_preview ?? false)
       setIsRequired(lesson?.is_required ?? true)
@@ -213,32 +218,41 @@ export function LessonDialog({
             {/* Type-specific fields */}
             {type === 'video' && (
               <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-                <div className="space-y-2">
-                  <Label htmlFor="videoUrl">Video URL</Label>
-                  <Input
-                    id="videoUrl"
-                    type="url"
-                    value={videoUrl}
-                    onChange={(e) => setVideoUrl(e.target.value)}
-                    placeholder="https://..."
-                    disabled={isPending}
-                  />
-                  <p className="text-xs text-gray-500">
-                    Paste a video URL (Mux, Bunny, YouTube, Vimeo)
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="duration">Duration (seconds)</Label>
-                  <Input
-                    id="duration"
-                    type="number"
-                    min="0"
-                    value={duration}
-                    onChange={(e) => setDuration(e.target.value)}
-                    placeholder="e.g., 300 for 5 minutes"
-                    disabled={isPending}
-                  />
-                </div>
+                {isEditing && lesson ? (
+                  // Show uploader for existing lessons
+                  <>
+                    <Label>Video</Label>
+                    <VideoUploader
+                      orgId={orgId}
+                      lessonId={lesson.id}
+                      currentVideoUrl={videoUrl || undefined}
+                      currentVideoPath={videoPath}
+                      onUploadComplete={(url, dur) => {
+                        setVideoUrl(url)
+                        if (dur) setDuration(dur.toString())
+                      }}
+                      onDelete={() => {
+                        setVideoUrl('')
+                        setVideoPath(null)
+                        setDuration('')
+                      }}
+                      disabled={isPending}
+                    />
+                  </>
+                ) : (
+                  // For new lessons, show message to create first
+                  <div className="text-center py-4 text-sm text-gray-500">
+                    <Video className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                    <p>Save the lesson first, then you can upload a video.</p>
+                  </div>
+                )}
+                
+                {duration && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
+                    <Clock className="h-4 w-4" />
+                    <span>Duration: {formatDuration(parseInt(duration))}</span>
+                  </div>
+                )}
               </div>
             )}
 
@@ -325,4 +339,18 @@ export function LessonDialog({
       </DialogContent>
     </Dialog>
   )
+}
+
+// Helper to format duration in seconds to human readable
+function formatDuration(seconds: number): string {
+  if (!seconds || isNaN(seconds)) return '0:00'
+  
+  const hours = Math.floor(seconds / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const secs = seconds % 60
+
+  if (hours > 0) {
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+  }
+  return `${minutes}:${secs.toString().padStart(2, '0')}`
 }

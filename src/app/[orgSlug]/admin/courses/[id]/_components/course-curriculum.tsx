@@ -35,6 +35,7 @@ import { useRouter } from 'next/navigation'
 
 interface CourseCurriculumProps {
   course: CourseWithModules
+  orgId: string
 }
 
 function getLessonIcon(type: LessonType) {
@@ -72,7 +73,7 @@ function formatDuration(seconds: number | null): string {
   return `${mins}m ${secs}s`
 }
 
-export function CourseCurriculum({ course }: CourseCurriculumProps) {
+export function CourseCurriculum({ course, orgId }: CourseCurriculumProps) {
   const router = useRouter()
   const [expandedModules, setExpandedModules] = useState<Set<string>>(
     new Set(course.modules.map(m => m.id)) // All expanded by default
@@ -399,6 +400,7 @@ export function CourseCurriculum({ course }: CourseCurriculumProps) {
         onOpenChange={setLessonDialogOpen}
         moduleId={lessonModuleId}
         lesson={editingLesson}
+        orgId={orgId}
         onSuccess={() => {
           setLessonDialogOpen(false)
           setEditingLesson(null)

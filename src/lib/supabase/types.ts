@@ -139,6 +139,47 @@ export interface CourseWithInstructor extends Course {
   instructor: User | null
 }
 
+export interface LessonProgress {
+  id: string
+  enrollment_id: string
+  lesson_id: string
+  completed: boolean
+  completed_at: string | null
+  watch_time: number
+  last_position: number
+  attempts: number
+  created_at: string
+  updated_at: string
+}
+
+export interface Certificate {
+  id: string
+  org_id: string
+  user_id: string
+  course_id: string
+  enrollment_id: string | null
+  certificate_number: string
+  recipient_name: string
+  issued_at: string
+  pdf_url: string | null
+  metadata: Record<string, unknown>
+  created_at: string
+  updated_at: string
+}
+
+export interface EnrollmentWithCourse extends Enrollment {
+  course: Course
+}
+
+export interface EnrollmentWithProgress extends Enrollment {
+  course: CourseWithModules
+  lesson_progress: LessonProgress[]
+}
+
+export interface CertificateWithCourse extends Certificate {
+  course: Course
+}
+
 // Auth context types
 export interface AuthUser {
   id: string

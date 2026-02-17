@@ -98,6 +98,47 @@ export interface Enrollment {
   updated_at: string
 }
 
+export interface Module {
+  id: string
+  course_id: string
+  title: string
+  description: string | null
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
+export interface Lesson {
+  id: string
+  module_id: string
+  title: string
+  description: string | null
+  sort_order: number
+  type: LessonType
+  video_url: string | null
+  video_provider: string | null
+  video_id: string | null
+  content: string | null
+  duration: number | null
+  is_preview: boolean
+  is_required: boolean
+  metadata: Record<string, unknown>
+  created_at: string
+  updated_at: string
+}
+
+export interface ModuleWithLessons extends Module {
+  lessons: Lesson[]
+}
+
+export interface CourseWithModules extends Course {
+  modules: ModuleWithLessons[]
+}
+
+export interface CourseWithInstructor extends Course {
+  instructor: User | null
+}
+
 // Auth context types
 export interface AuthUser {
   id: string

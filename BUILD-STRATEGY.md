@@ -3,6 +3,13 @@
 ## Vision
 Make LearnStudio the best LMS platform with **usage-based pricing** — organizations only pay for what they use.
 
+## Branding
+- **Logo:** "Learn" (vivid green #22C55E) + "Studio" (black #0A0A0A)
+- **Primary:** Green #22C55E
+- **Secondary:** Black #0A0A0A
+- **Background:** Clean white/light gray #FAFAFA
+- **Sister brand:** Enrol Studio (Blue + Black)
+
 ## Pricing Philosophy
 
 ### Traditional LMS (what we're disrupting)

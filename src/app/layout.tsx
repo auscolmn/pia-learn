@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-sans",
@@ -10,16 +11,21 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Enrol Studio | Create and Sell Online Courses",
-  description: "The all-in-one platform for creators and educators to build, host, and sell professional online courses. Beautiful course builder, video hosting, payments, and certificates.",
-  keywords: ["online courses", "course builder", "sell courses", "video hosting", "LMS", "e-learning platform", "course creator"],
+  title: "LearnStudio | Modern LMS with Usage-Based Pricing",
+  description: "The multi-tenant LMS platform with transparent usage-based pricing. Pay only for active students and resources you use. No fixed tiers, no surprises.",
+  keywords: ["LMS", "learning management system", "online courses", "usage-based pricing", "multi-tenant", "white-label", "course builder", "e-learning platform"],
   openGraph: {
-    title: "Enrol Studio | Create and Sell Online Courses",
-    description: "The all-in-one platform for creators and educators to build, host, and sell professional online courses.",
-    url: "https://enrolstudio.com",
-    siteName: "Enrol Studio",
+    title: "LearnStudio | Modern LMS with Usage-Based Pricing",
+    description: "The multi-tenant LMS platform with transparent usage-based pricing. Pay only for what you use.",
+    url: "https://learnstudio.com",
+    siteName: "LearnStudio",
     locale: "en_US",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LearnStudio | Modern LMS with Usage-Based Pricing",
+    description: "Pay only for active students. No fixed tiers, no surprises.",
   },
 };
 
@@ -32,6 +38,7 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <body className={`${plusJakarta.variable} font-sans antialiased`}>
         {children}
+        <Toaster />
       </body>
     </html>
   );

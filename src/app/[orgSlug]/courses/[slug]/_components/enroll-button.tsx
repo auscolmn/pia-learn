@@ -31,7 +31,7 @@ export function EnrollButton({
     if (!isLoggedIn) {
       // Redirect to login with return URL
       const returnUrl = `/${orgSlug}/courses/${courseSlug}`
-      router.push(`/login?returnTo=${encodeURIComponent(returnUrl)}`)
+      router.push(`/login?redirect=${encodeURIComponent(returnUrl)}`)
       return
     }
 

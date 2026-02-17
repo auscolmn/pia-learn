@@ -19,7 +19,7 @@ export default async function LearnPage({ params, searchParams }: LearnPageProps
   // Check authentication
   const user = await getUser()
   if (!user) {
-    redirect(`/login?returnTo=/${orgSlug}/learn/${courseSlug}`)
+    redirect(`/login?redirect=/${orgSlug}/learn/${courseSlug}`)
   }
 
   // Get course data with enrollment and progress

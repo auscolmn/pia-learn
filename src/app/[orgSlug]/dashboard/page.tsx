@@ -33,7 +33,7 @@ export default async function StudentDashboard({ params }: DashboardPageProps) {
   // Check authentication
   const user = await getUser()
   if (!user) {
-    redirect(`/login?returnTo=/${orgSlug}/dashboard`)
+    redirect(`/login?redirect=/${orgSlug}/dashboard`)
   }
 
   // Fetch user's enrollments and certificates

@@ -1,6 +1,5 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import type { Database } from './types'
 
 /**
  * Create a Supabase client for middleware usage.
@@ -13,7 +12,7 @@ export async function createMiddlewareClient(request: NextRequest) {
     },
   })
 
-  const supabase = createServerClient<Database>(
+  const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -46,7 +45,6 @@ export async function createMiddlewareClient(request: NextRequest) {
  */
 export function extractOrgFromRequest(request: NextRequest): string | null {
   const hostname = request.headers.get('host') ?? ''
-  const url = new URL(request.url)
   
   // Check for custom domain (not a subdomain of learnstudio)
   const isLearnStudioDomain = hostname.endsWith('.learnstudio.com') || 
@@ -86,6 +84,7 @@ const PUBLIC_ROUTES = [
   '/login',
   '/register',
   '/forgot-password',
+  '/reset-password',
   '/auth/callback',
   '/auth/confirm',
   '/courses', // Public course catalog (when on org domain)
@@ -117,6 +116,18 @@ function matchesRoute(pathname: string, routes: string[]): boolean {
     if (pathname.startsWith(route + '/')) return true
     return false
   })
+}
+
+interface UserProfile {
+  is_platform_admin: boolean
+}
+
+interface OrgData {
+  id: string
+}
+
+interface MembershipData {
+  role: string
 }
 
 /**
@@ -165,7 +176,8 @@ export async function updateSession(request: NextRequest) {
       .eq('id', user.id)
       .single()
     
-    if (!profile?.is_platform_admin) {
+    const userProfile = profile as UserProfile | null
+    if (!userProfile?.is_platform_admin) {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
     return response
@@ -184,8 +196,9 @@ export async function updateSession(request: NextRequest) {
     }
     
     const { data: org } = await orgQuery.single()
+    const orgData = org as OrgData | null
     
-    if (!org) {
+    if (!orgData) {
       // Org not found
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
@@ -194,18 +207,19 @@ export async function updateSession(request: NextRequest) {
     const { data: membership } = await supabase
       .from('org_members')
       .select('role')
-      .eq('org_id', org.id)
+      .eq('org_id', orgData.id)
       .eq('user_id', user.id)
       .single()
     
-    if (!membership) {
+    const membershipData = membership as MembershipData | null
+    if (!membershipData) {
       // User is not an org member
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
     
     // User has access - add org context to headers
-    response.headers.set('x-org-id', org.id)
-    response.headers.set('x-org-role', membership.role)
+    response.headers.set('x-org-id', orgData.id)
+    response.headers.set('x-org-role', membershipData.role)
     return response
   }
   

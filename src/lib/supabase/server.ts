@@ -1,6 +1,6 @@
 import { createServerClient as createSupabaseServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import type { Database, User, Organization, OrgMember, AuthUser, OrgContext, SessionContext } from './types'
+import type { User, Organization, OrgMember, AuthUser, OrgContext, SessionContext } from './types'
 
 /**
  * Create a Supabase client for server-side usage (Server Components, Route Handlers).
@@ -9,7 +9,7 @@ import type { Database, User, Organization, OrgMember, AuthUser, OrgContext, Ses
 export async function createServerClient() {
   const cookieStore = await cookies()
 
-  return createSupabaseServerClient<Database>(
+  return createSupabaseServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -66,7 +66,9 @@ export async function getUser(): Promise<AuthUser | null> {
     .eq('id', authUser.id)
     .single()
 
-  if (!profile) {
+  const userProfile = profile as User | null
+
+  if (!userProfile) {
     // User exists in auth but not in our table (shouldn't happen with trigger)
     return {
       id: authUser.id,
@@ -78,11 +80,11 @@ export async function getUser(): Promise<AuthUser | null> {
   }
 
   return {
-    id: profile.id,
-    email: profile.email,
-    fullName: profile.full_name,
-    avatarUrl: profile.avatar_url,
-    isPlatformAdmin: profile.is_platform_admin,
+    id: userProfile.id,
+    email: userProfile.email,
+    fullName: userProfile.full_name,
+    avatarUrl: userProfile.avatar_url,
+    isPlatformAdmin: userProfile.is_platform_admin,
   }
 }
 
@@ -103,7 +105,7 @@ export async function getOrgBySlugOrDomain(
     .single()
 
   if (orgBySlug) {
-    return orgBySlug
+    return orgBySlug as Organization
   }
 
   // Try custom domain
@@ -113,7 +115,7 @@ export async function getOrgBySlugOrDomain(
     .eq('custom_domain', slugOrDomain)
     .single()
 
-  return orgByDomain ?? null
+  return (orgByDomain as Organization) ?? null
 }
 
 /**
@@ -132,7 +134,7 @@ export async function getOrgMembership(
     .eq('user_id', userId)
     .single()
 
-  return membership ?? null
+  return (membership as OrgMember) ?? null
 }
 
 /**
@@ -190,10 +192,12 @@ export async function getUserOrganizations(
     .eq('user_id', userId)
 
   // Filter out any null organizations and type properly
-  return (memberships ?? []).filter(
+  const result = (memberships ?? []).filter(
     (m): m is OrgMember & { organization: Organization } => 
       m.organization !== null
   )
+  
+  return result as (OrgMember & { organization: Organization })[]
 }
 
 /**

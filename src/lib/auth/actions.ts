@@ -3,6 +3,9 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import type { Database } from '@/lib/supabase/types'
+
+type SupabaseClient = Awaited<ReturnType<typeof createServerClient>>
 
 export interface AuthActionResult {
   success: boolean
@@ -84,16 +87,19 @@ export async function signUpWithEmail(
     }
 
     // Create organization
-    const { data: org, error: orgError } = await supabase
+    type OrgInsert = Database['public']['Tables']['organizations']['Insert']
+    const orgInsert: OrgInsert = {
+      name: options.orgName,
+      slug: options.orgSlug,
+      plan: 'free',
+      primary_color: '#6366F1',
+      secondary_color: '#818CF8',
+      settings: {},
+    }
+
+    const { data: org, error: orgError } = await (supabase as unknown as SupabaseClient)
       .from('organizations')
-      .insert({
-        name: options.orgName,
-        slug: options.orgSlug,
-        plan: 'free',
-        primary_color: '#6366F1',
-        secondary_color: '#818CF8',
-        settings: {},
-      })
+      .insert(orgInsert as never)
       .select()
       .single()
 
@@ -106,13 +112,16 @@ export async function signUpWithEmail(
     }
 
     // Add user as admin of the org
-    const { error: memberError } = await supabase
+    type MemberInsert = Database['public']['Tables']['org_members']['Insert']
+    const memberInsert: MemberInsert = {
+      org_id: (org as { id: string }).id,
+      user_id: data.user.id,
+      role: 'admin',
+    }
+
+    const { error: memberError } = await (supabase as unknown as SupabaseClient)
       .from('org_members')
-      .insert({
-        org_id: org.id,
-        user_id: data.user.id,
-        role: 'admin',
-      })
+      .insert(memberInsert as never)
 
     if (memberError) {
       return { success: false, error: `Failed to add you to organization: ${memberError.message}` }
@@ -234,12 +243,12 @@ export async function updateProfile(
   }
 
   // Update users table
-  const { error: profileError } = await supabase
+  const { error: profileError } = await (supabase as unknown as SupabaseClient)
     .from('users')
     .update({
       full_name: fullName,
       avatar_url: avatarUrl ?? null,
-    })
+    } as never)
     .eq('id', user.id)
 
   if (profileError) {
@@ -255,7 +264,7 @@ export async function updateProfile(
  */
 export async function joinOrganization(
   orgSlug: string,
-  inviteCode?: string
+  _inviteCode?: string
 ): Promise<AuthActionResult> {
   const supabase = await createServerClient()
 
@@ -275,11 +284,13 @@ export async function joinOrganization(
     return { success: false, error: 'Organization not found' }
   }
 
+  const orgId = (org as { id: string }).id
+
   // Check if already a member
   const { data: existing } = await supabase
     .from('org_members')
     .select('id')
-    .eq('org_id', org.id)
+    .eq('org_id', orgId)
     .eq('user_id', user.id)
     .single()
 
@@ -290,13 +301,16 @@ export async function joinOrganization(
   // TODO: Validate invite code if provided
   // For now, anyone can join as instructor (adjust based on invite system)
   
-  const { error: memberError } = await supabase
+  type MemberInsert = Database['public']['Tables']['org_members']['Insert']
+  const memberInsert: MemberInsert = {
+    org_id: orgId,
+    user_id: user.id,
+    role: 'instructor',
+  }
+
+  const { error: memberError } = await (supabase as unknown as SupabaseClient)
     .from('org_members')
-    .insert({
-      org_id: org.id,
-      user_id: user.id,
-      role: 'instructor', // Default role for invited members
-    })
+    .insert(memberInsert as never)
 
   if (memberError) {
     return { success: false, error: 'Failed to join organization' }

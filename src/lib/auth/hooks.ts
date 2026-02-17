@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
-import type { AuthUser, Organization, OrgMember, OrgContext } from '@/lib/supabase/types'
+import type { AuthUser, Organization, OrgMember, OrgContext, User } from '@/lib/supabase/types'
 
 /**
  * Hook to get the current authenticated user.
@@ -23,7 +23,7 @@ export function useUser() {
       .eq('id', authUser.id)
       .single()
 
-    if (profileError) {
+    if (profileError || !profile) {
       // User might not have a profile yet (trigger might not have fired)
       return {
         id: authUser.id,
@@ -34,12 +34,14 @@ export function useUser() {
       }
     }
 
+    const userProfile = profile as User
+
     return {
-      id: profile.id,
-      email: profile.email,
-      fullName: profile.full_name,
-      avatarUrl: profile.avatar_url,
-      isPlatformAdmin: profile.is_platform_admin,
+      id: userProfile.id,
+      email: userProfile.email,
+      fullName: userProfile.full_name,
+      avatarUrl: userProfile.avatar_url,
+      isPlatformAdmin: userProfile.is_platform_admin,
     }
   }, [])
 
@@ -126,12 +128,12 @@ export function useOrg(orgSlug?: string) {
             .single()
 
           if (domainOrg) {
-            setOrg(domainOrg)
+            setOrg(domainOrg as Organization)
           } else {
             setOrg(null)
           }
         } else {
-          setOrg(orgData)
+          setOrg(orgData as Organization)
         }
 
         // If user is logged in, fetch their membership
@@ -139,11 +141,11 @@ export function useOrg(orgSlug?: string) {
           const { data: membershipData } = await supabase
             .from('org_members')
             .select('*')
-            .eq('org_id', orgData.id)
+            .eq('org_id', (orgData as Organization).id)
             .eq('user_id', user.id)
             .single()
 
-          setMembership(membershipData)
+          setMembership(membershipData as OrgMember | null)
         }
       } catch (err) {
         setError(err instanceof Error ? err : new Error('Failed to fetch org'))
@@ -196,7 +198,7 @@ export function useUserOrganizations() {
         const validMemberships = (data ?? []).filter(
           (m): m is OrgMember & { organization: Organization } =>
             m.organization !== null
-        )
+        ) as (OrgMember & { organization: Organization })[]
 
         setOrganizations(validMemberships)
       } catch (err) {

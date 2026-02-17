@@ -266,12 +266,21 @@ export function LearningInterface({
                   </div>
                 ) : selectedLesson.type === 'quiz' ? (
                   <div className="max-w-3xl mx-auto px-4 py-8">
-                    <div className="bg-orange-50 rounded-lg p-8 text-center">
-                      <HelpCircle className="h-12 w-12 text-orange-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-900">Quiz</h3>
-                      <p className="text-sm text-gray-600 mt-2">
-                        Quiz functionality coming soon.
-                      </p>
+                    <div className="bg-green-50 rounded-lg p-8 text-center">
+                      <HelpCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {selectedLesson.title}
+                      </h3>
+                      {selectedLesson.description && (
+                        <p className="text-sm text-gray-600 mt-2 mb-4">
+                          {selectedLesson.description}
+                        </p>
+                      )}
+                      <Link href={`/${orgSlug}/learn/${course.slug}/quiz/${selectedLesson.id}`}>
+                        <Button className="mt-4 bg-green-600 hover:bg-green-700">
+                          {currentProgress?.completed ? 'Retake Quiz' : 'Start Quiz'}
+                        </Button>
+                      </Link>
                     </div>
                   </div>
                 ) : (

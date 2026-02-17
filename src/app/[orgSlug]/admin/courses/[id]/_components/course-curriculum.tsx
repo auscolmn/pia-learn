@@ -21,6 +21,7 @@ import type { CourseWithModules, ModuleWithLessons, Lesson, LessonType } from '@
 import { ModuleDialog } from './module-dialog'
 import { LessonDialog } from './lesson-dialog'
 import { DeleteConfirmDialog } from './delete-confirm-dialog'
+import { QuizBuilder } from './quiz-builder'
 import { deleteModule, deleteLesson } from '@/lib/courses/actions'
 import {
   DropdownMenu,
@@ -89,6 +90,14 @@ export function CourseCurriculum({ course, orgId }: CourseCurriculumProps) {
   
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<{ type: 'module' | 'lesson'; id: string; name: string } | null>(null)
+  
+  const [quizBuilderOpen, setQuizBuilderOpen] = useState(false)
+  const [quizLesson, setQuizLesson] = useState<Lesson | null>(null)
+
+  const handleEditQuiz = (lesson: Lesson) => {
+    setQuizLesson(lesson)
+    setQuizBuilderOpen(true)
+  }
 
   const toggleModule = (moduleId: string) => {
     const newExpanded = new Set(expandedModules)
@@ -333,6 +342,12 @@ export function CourseCurriculum({ course, orgId }: CourseCurriculumProps) {
                                     <Pencil className="mr-2 h-4 w-4" />
                                     Edit Lesson
                                   </DropdownMenuItem>
+                                  {lesson.type === 'quiz' && (
+                                    <DropdownMenuItem onClick={() => handleEditQuiz(lesson)}>
+                                      <HelpCircle className="mr-2 h-4 w-4" />
+                                      Edit Quiz
+                                    </DropdownMenuItem>
+                                  )}
                                   <DropdownMenuItem>
                                     {lesson.is_preview ? (
                                       <>
@@ -420,6 +435,24 @@ export function CourseCurriculum({ course, orgId }: CourseCurriculumProps) {
         }
         onConfirm={confirmDelete}
       />
+
+      {quizLesson && (
+        <QuizBuilder
+          open={quizBuilderOpen}
+          onOpenChange={(open) => {
+            setQuizBuilderOpen(open)
+            if (!open) setQuizLesson(null)
+          }}
+          lessonId={quizLesson.id}
+          lessonTitle={quizLesson.title}
+          orgId={orgId}
+          onSuccess={() => {
+            setQuizBuilderOpen(false)
+            setQuizLesson(null)
+            router.refresh()
+          }}
+        />
+      )}
     </div>
   )
 }

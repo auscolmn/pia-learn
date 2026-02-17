@@ -7,6 +7,7 @@ export type OrgMemberRole = 'admin' | 'instructor'
 export type CourseStatus = 'draft' | 'published' | 'archived'
 export type LessonType = 'video' | 'text' | 'quiz'
 export type EnrollmentStatus = 'active' | 'completed' | 'cancelled' | 'expired'
+export type QuestionType = 'multiple_choice' | 'true_false' | 'short_answer'
 
 export interface User {
   id: string
@@ -165,6 +166,69 @@ export interface Certificate {
   metadata: Record<string, unknown>
   created_at: string
   updated_at: string
+}
+
+// Quiz types
+export interface QuizQuestionOption {
+  text: string
+  is_correct: boolean
+}
+
+export interface Quiz {
+  id: string
+  lesson_id: string
+  title: string
+  description: string | null
+  passing_score: number
+  max_attempts: number | null
+  time_limit: number | null // in minutes
+  shuffle_questions: boolean
+  show_correct_answers: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface QuizQuestion {
+  id: string
+  quiz_id: string
+  question: string
+  type: QuestionType
+  options: QuizQuestionOption[] | null
+  correct_answer: string | null // for short_answer
+  explanation: string | null
+  points: number
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
+export interface QuizAnswerRecord {
+  question_id: string
+  answer: string | number // index for multiple_choice, string for others
+  is_correct: boolean
+}
+
+export interface QuizAttempt {
+  id: string
+  quiz_id: string
+  enrollment_id: string
+  user_id: string
+  answers: QuizAnswerRecord[]
+  score: number | null
+  passed: boolean | null
+  started_at: string
+  completed_at: string | null
+  time_spent: number | null // in seconds
+  created_at: string
+  updated_at: string
+}
+
+export interface QuizWithQuestions extends Quiz {
+  questions: QuizQuestion[]
+}
+
+export interface QuizAttemptWithDetails extends QuizAttempt {
+  quiz: Quiz
 }
 
 export interface EnrollmentWithCourse extends Enrollment {

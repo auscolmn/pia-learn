@@ -274,7 +274,9 @@ export function LessonDialog({
               <div className="p-4 bg-orange-50 rounded-lg text-center">
                 <HelpCircle className="h-8 w-8 text-orange-400 mx-auto mb-2" />
                 <p className="text-sm text-orange-700">
-                  Quiz questions can be configured after creating the lesson.
+                  {isEditing 
+                    ? 'Save changes and then use the Quiz Builder to manage questions.'
+                    : 'Save the lesson first, then you can configure quiz questions.'}
                 </p>
               </div>
             )}

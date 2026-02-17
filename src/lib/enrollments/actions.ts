@@ -184,10 +184,10 @@ export async function markLessonComplete(
     return { success: false, error: 'Not authenticated' }
   }
 
-  // Verify enrollment belongs to user
+  // Verify enrollment belongs to user and get course info
   const { data: enrollment } = await supabase
     .from('enrollments')
-    .select('id, user_id')
+    .select('id, user_id, course_id, org_id, status')
     .eq('id', enrollmentId)
     .eq('user_id', user.id)
     .single()
@@ -215,9 +215,84 @@ export async function markLessonComplete(
   }
 
   // The trigger will auto-update enrollment progress_percent
+  // Check if course is now complete and auto-issue certificate
+  await checkAndIssueCertificate(enrollmentId, enrollment.course_id, enrollment.org_id, user.id)
+
   revalidatePath('/[orgSlug]/learn/[courseSlug]', 'page')
   revalidatePath('/[orgSlug]/dashboard', 'page')
   return { success: true, data: progress as LessonProgress }
+}
+
+/**
+ * Check if all lessons are completed and issue certificate if so
+ */
+async function checkAndIssueCertificate(
+  enrollmentId: string,
+  courseId: string,
+  orgId: string,
+  userId: string
+): Promise<void> {
+  const supabase = await createServerClient()
+  
+  // Get total lesson count for the course
+  const { data: modules } = await supabase
+    .from('modules')
+    .select('id')
+    .eq('course_id', courseId)
+
+  if (!modules || modules.length === 0) return
+
+  const moduleIds = modules.map(m => m.id)
+  
+  const { count: totalLessons } = await supabase
+    .from('lessons')
+    .select('id', { count: 'exact', head: true })
+    .in('module_id', moduleIds)
+    .eq('is_required', true)
+
+  if (!totalLessons || totalLessons === 0) return
+
+  // Get completed required lessons count
+  const { data: completedProgress } = await supabase
+    .from('lesson_progress')
+    .select('lesson_id')
+    .eq('enrollment_id', enrollmentId)
+    .eq('completed', true)
+
+  if (!completedProgress) return
+
+  const completedLessonIds = completedProgress.map(p => p.lesson_id)
+
+  // Count how many required lessons are completed
+  const { count: completedRequired } = await supabase
+    .from('lessons')
+    .select('id', { count: 'exact', head: true })
+    .in('module_id', moduleIds)
+    .in('id', completedLessonIds)
+    .eq('is_required', true)
+
+  // If all required lessons are complete, mark enrollment as completed and issue certificate
+  if (completedRequired === totalLessons) {
+    // Update enrollment status to completed
+    const { error: updateError } = await supabase
+      .from('enrollments')
+      .update({
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+        progress_percent: 100,
+      })
+      .eq('id', enrollmentId)
+
+    if (updateError) {
+      console.error('Failed to update enrollment status:', updateError)
+      return
+    }
+
+    // Issue certificate asynchronously (don't block the response)
+    import('@/lib/certificates/actions').then(({ issueCertificateForEnrollment }) => {
+      issueCertificateForEnrollment(enrollmentId).catch(console.error)
+    })
+  }
 }
 
 export async function markLessonIncomplete(

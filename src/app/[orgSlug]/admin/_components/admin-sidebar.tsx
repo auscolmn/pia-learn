@@ -13,6 +13,7 @@ import {
   Menu,
   X,
   GraduationCap,
+  CreditCard,
 } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -30,6 +31,7 @@ const navigation = [
   { name: 'Team', href: '/team', icon: Users },
   { name: 'Certificates', href: '/certificates', icon: Award },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+  { name: 'Billing', href: '/billing', icon: CreditCard },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 

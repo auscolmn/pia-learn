@@ -16,12 +16,14 @@ import {
   Trash2,
   Eye,
   EyeOff,
+  BarChart3,
 } from 'lucide-react'
 import type { CourseWithModules, ModuleWithLessons, Lesson, LessonType } from '@/lib/supabase/types'
 import { ModuleDialog } from './module-dialog'
 import { LessonDialog } from './lesson-dialog'
 import { DeleteConfirmDialog } from './delete-confirm-dialog'
 import { QuizBuilder } from './quiz-builder'
+import { QuizResultsDialog } from './quiz-results-dialog'
 import { deleteModule, deleteLesson } from '@/lib/courses/actions'
 import {
   DropdownMenu,
@@ -93,10 +95,18 @@ export function CourseCurriculum({ course, orgId }: CourseCurriculumProps) {
   
   const [quizBuilderOpen, setQuizBuilderOpen] = useState(false)
   const [quizLesson, setQuizLesson] = useState<Lesson | null>(null)
+  
+  const [quizResultsOpen, setQuizResultsOpen] = useState(false)
+  const [quizResultsLesson, setQuizResultsLesson] = useState<Lesson | null>(null)
 
   const handleEditQuiz = (lesson: Lesson) => {
     setQuizLesson(lesson)
     setQuizBuilderOpen(true)
+  }
+
+  const handleViewQuizResults = (lesson: Lesson) => {
+    setQuizResultsLesson(lesson)
+    setQuizResultsOpen(true)
   }
 
   const toggleModule = (moduleId: string) => {
@@ -343,10 +353,16 @@ export function CourseCurriculum({ course, orgId }: CourseCurriculumProps) {
                                     Edit Lesson
                                   </DropdownMenuItem>
                                   {lesson.type === 'quiz' && (
-                                    <DropdownMenuItem onClick={() => handleEditQuiz(lesson)}>
-                                      <HelpCircle className="mr-2 h-4 w-4" />
-                                      Edit Quiz
-                                    </DropdownMenuItem>
+                                    <>
+                                      <DropdownMenuItem onClick={() => handleEditQuiz(lesson)}>
+                                        <HelpCircle className="mr-2 h-4 w-4" />
+                                        Edit Quiz
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleViewQuizResults(lesson)}>
+                                        <BarChart3 className="mr-2 h-4 w-4" />
+                                        View Results
+                                      </DropdownMenuItem>
+                                    </>
                                   )}
                                   <DropdownMenuItem>
                                     {lesson.is_preview ? (

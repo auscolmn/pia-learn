@@ -1,3 +1,4 @@
+import Stripe from 'stripe'
 import { stripe } from './client'
 import type { CreateCheckoutParams, CheckoutSessionResult, CheckoutMetadata } from './types'
 
@@ -24,16 +25,8 @@ export async function createCourseCheckout(
     platformFeePercent = PLATFORM_FEE_PERCENT,
   } = params
 
-  // Metadata to store with the session
-  const metadata: CheckoutMetadata = {
-    courseId,
-    orgId,
-    userId,
-    type: 'course_purchase',
-  }
-
   // Build checkout session params
-  const sessionParams: Parameters<typeof stripe.checkout.sessions.create>[0] = {
+  const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: 'payment',
     payment_method_types: ['card'],
     customer_email: userEmail,
@@ -50,7 +43,12 @@ export async function createCourseCheckout(
         quantity: 1,
       },
     ],
-    metadata,
+    metadata: {
+      courseId,
+      orgId,
+      userId,
+      type: 'course_purchase',
+    },
     success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: cancelUrl,
   }

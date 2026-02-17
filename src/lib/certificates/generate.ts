@@ -98,9 +98,9 @@ export async function generateCertificatePDF(params: {
   }
 
   // Generate PDF buffer
-  const pdfBuffer = await renderToBuffer(
-    createCertificateDocument(certificateData)
-  )
+  const document = createCertificateDocument(certificateData)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const pdfBuffer = await renderToBuffer(document as any)
 
   // Upload to Supabase Storage
   const supabase = await createServerClient()

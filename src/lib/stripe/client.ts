@@ -1,13 +1,28 @@
 import Stripe from 'stripe'
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not set')
+let _stripe: Stripe | null = null
+
+/**
+ * Get the Stripe client instance (lazy initialized)
+ */
+export function getStripe(): Stripe {
+  if (_stripe) return _stripe
+
+  const secretKey = process.env.STRIPE_SECRET_KEY
+  if (!secretKey) {
+    throw new Error('STRIPE_SECRET_KEY is not set')
+  }
+
+  _stripe = new Stripe(secretKey, {
+    apiVersion: '2026-01-28.clover',
+    typescript: true,
+  })
+
+  return _stripe
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2025-05-28.basil',
-  typescript: true,
-})
+// Alias for convenience
+export { getStripe as stripe }
 
 // Publishable key for client-side usage
 export const getPublishableKey = () => {

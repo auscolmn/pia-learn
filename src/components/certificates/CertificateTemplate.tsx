@@ -390,6 +390,6 @@ export default function CertificateTemplate({ data }: { data: CertificateData })
 /**
  * Factory function to create the certificate document element for PDF rendering
  */
-export function createCertificateDocument(data: CertificateData) {
-  return React.createElement(CertificateTemplate, { data })
+export function createCertificateDocument(data: CertificateData): React.ReactElement {
+  return <CertificateTemplate data={data} />
 }

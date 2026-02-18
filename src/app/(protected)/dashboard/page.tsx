@@ -41,7 +41,7 @@ export default async function DashboardPage() {
             <h2 className="text-lg font-semibold text-gray-900">
               Your Organizations
             </h2>
-            <Link href="/register?createOrg=true">
+            <Link href="/create-org">
               <Button size="sm">
                 <Plus className="mr-2 h-4 w-4" />
                 New Organization
@@ -62,7 +62,7 @@ export default async function DashboardPage() {
                   Create your first organization to start building courses and
                   inviting students.
                 </p>
-                <Link href="/register?createOrg=true">
+                <Link href="/create-org">
                   <Button>
                     <Plus className="mr-2 h-4 w-4" />
                     Create Organization

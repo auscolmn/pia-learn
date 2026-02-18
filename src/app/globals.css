@@ -232,4 +232,10 @@ html {
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Serif typography for editorial headings */
+  .font-serif {
+    font-family: var(--font-serif), Georgia, serif;
+    font-weight: 400;
+  }
 }

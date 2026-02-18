@@ -38,16 +38,14 @@ export default async function LearnPage({ params, searchParams }: LearnPageProps
   // Find the selected lesson
   let selectedLesson = null
   let selectedModuleIndex = 0
-  let selectedLessonIndex = 0
 
   for (let mi = 0; mi < course.modules.length; mi++) {
-    const module = course.modules[mi]
-    for (let li = 0; li < module.lessons.length; li++) {
-      const lesson = module.lessons[li]
+    const courseModule = course.modules[mi]
+    for (let li = 0; li < courseModule.lessons.length; li++) {
+      const lesson = courseModule.lessons[li]
       if (lesson.id === selectedLessonId) {
         selectedLesson = lesson
         selectedModuleIndex = mi
-        selectedLessonIndex = li
         break
       }
     }
@@ -58,7 +56,6 @@ export default async function LearnPage({ params, searchParams }: LearnPageProps
   if (!selectedLesson && course.modules.length > 0 && course.modules[0].lessons.length > 0) {
     selectedLesson = course.modules[0].lessons[0]
     selectedModuleIndex = 0
-    selectedLessonIndex = 0
   }
 
   // Build progress map

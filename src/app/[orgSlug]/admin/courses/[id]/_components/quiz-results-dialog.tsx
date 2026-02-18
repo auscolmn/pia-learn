@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
 import { Card, CardContent } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
@@ -30,7 +29,6 @@ interface QuizResultsDialogProps {
   onOpenChange: (open: boolean) => void
   lessonId: string
   lessonTitle: string
-  orgId: string
 }
 
 interface AttemptWithUser extends QuizAttempt {
@@ -56,20 +54,13 @@ export function QuizResultsDialog({
   onOpenChange,
   lessonId,
   lessonTitle,
-  orgId,
 }: QuizResultsDialogProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [quiz, setQuiz] = useState<QuizWithQuestions | null>(null)
   const [stats, setStats] = useState<QuizStats | null>(null)
   const [attempts, setAttempts] = useState<AttemptWithUser[]>([])
 
-  useEffect(() => {
-    if (open) {
-      loadData()
-    }
-  }, [open, lessonId])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setIsLoading(true)
 
     // Get quiz
@@ -107,7 +98,13 @@ export function QuizResultsDialog({
     }
 
     setIsLoading(false)
-  }
+  }, [lessonId])
+
+  useEffect(() => {
+    if (open) {
+      loadData()
+    }
+  }, [open, loadData])
 
   if (isLoading) {
     return (

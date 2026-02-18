@@ -366,7 +366,7 @@ export default function PricingPage() {
                   <div className="mt-8 p-4 bg-cta/10 rounded-lg text-center">
                     <p className="text-sm text-muted-foreground">
                       At ${(students > 0 ? (total / students).toFixed(2) : "0.00")} per student, 
-                      you're saving compared to traditional LMS pricing.
+                      you&apos;re saving compared to traditional LMS pricing.
                     </p>
                   </div>
 

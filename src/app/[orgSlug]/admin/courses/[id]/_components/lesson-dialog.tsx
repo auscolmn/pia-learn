@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useTransition, useEffect } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Dialog,
   DialogContent,
@@ -49,33 +49,18 @@ export function LessonDialog({
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   
-  const [title, setTitle] = useState('')
-  const [type, setType] = useState<LessonType>('video')
-  const [description, setDescription] = useState('')
-  const [content, setContent] = useState('')
-  const [videoUrl, setVideoUrl] = useState('')
-  const [videoPath, setVideoPath] = useState<string | null>(null)
-  const [duration, setDuration] = useState('')
-  const [isPreview, setIsPreview] = useState(false)
-  const [isRequired, setIsRequired] = useState(true)
+  // Initialize form state from props (re-initialized when key changes)
+  const [title, setTitle] = useState(lesson?.title ?? '')
+  const [type, setType] = useState<LessonType>(lesson?.type ?? 'video')
+  const [description, setDescription] = useState(lesson?.description ?? '')
+  const [content, setContent] = useState(lesson?.content ?? '')
+  const [videoUrl, setVideoUrl] = useState(lesson?.video_url ?? '')
+  const [videoPath, setVideoPath] = useState<string | null>(lesson?.video_id ?? null)
+  const [duration, setDuration] = useState(lesson?.duration?.toString() ?? '')
+  const [isPreview, setIsPreview] = useState(lesson?.is_preview ?? false)
+  const [isRequired, setIsRequired] = useState(lesson?.is_required ?? true)
 
   const isEditing = !!lesson
-
-  // Reset form when dialog opens/closes or lesson changes
-  useEffect(() => {
-    if (open) {
-      setTitle(lesson?.title ?? '')
-      setType(lesson?.type ?? 'video')
-      setDescription(lesson?.description ?? '')
-      setContent(lesson?.content ?? '')
-      setVideoUrl(lesson?.video_url ?? '')
-      setVideoPath(lesson?.video_id ?? null) // video_id stores the path for supabase
-      setDuration(lesson?.duration?.toString() ?? '')
-      setIsPreview(lesson?.is_preview ?? false)
-      setIsRequired(lesson?.is_required ?? true)
-      setError(null)
-    }
-  }, [open, lesson])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

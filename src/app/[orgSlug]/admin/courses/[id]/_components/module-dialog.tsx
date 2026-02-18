@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition, useEffect } from 'react'
+import { useState, useTransition } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -36,19 +36,11 @@ export function ModuleDialog({
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
+  // Initialize form state from props (re-initialized when key changes on parent)
+  const [title, setTitle] = useState(module?.title ?? '')
+  const [description, setDescription] = useState(module?.description ?? '')
 
   const isEditing = !!module
-
-  // Reset form when dialog opens/closes or module changes
-  useEffect(() => {
-    if (open) {
-      setTitle(module?.title ?? '')
-      setDescription(module?.description ?? '')
-      setError(null)
-    }
-  }, [open, module])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

@@ -282,9 +282,9 @@ export default async function CoursesPage({ params, searchParams }: CoursesPageP
         <div className="container mx-auto text-center text-sm text-muted-foreground">
           <p>
             © {new Date().getFullYear()} {org.name}. Powered by{" "}
-            <a href="/" className="text-primary hover:underline">
+            <Link href="/" className="text-primary hover:underline">
               LearnStudio
-            </a>
+            </Link>
           </p>
         </div>
       </footer>

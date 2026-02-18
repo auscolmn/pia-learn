@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import {
@@ -35,25 +36,22 @@ const navigation = [
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 
-export function AdminSidebar({ orgSlug, orgName, orgLogo }: AdminSidebarProps) {
-  const pathname = usePathname()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const basePath = `/${orgSlug}/admin`
+interface SidebarContentProps {
+  orgSlug: string
+  orgName: string
+  orgLogo?: string | null
+  basePath: string
+  isActive: (href: string) => boolean
+  onNavClick?: () => void
+}
 
-  const isActive = (href: string) => {
-    const fullPath = `${basePath}${href}`
-    if (href === '') {
-      return pathname === basePath || pathname === `${basePath}/`
-    }
-    return pathname.startsWith(fullPath)
-  }
-
-  const SidebarContent = () => (
+function SidebarContent({ orgSlug, orgName, orgLogo, basePath, isActive, onNavClick }: SidebarContentProps) {
+  return (
     <>
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 border-b border-gray-200 px-4">
         {orgLogo ? (
-          <img src={orgLogo} alt={orgName} className="h-8 w-8 rounded-lg object-cover" />
+          <Image src={orgLogo} alt={orgName} width={32} height={32} className="rounded-lg object-cover" />
         ) : (
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-600 text-white font-semibold">
             {orgName.charAt(0).toUpperCase()}
@@ -75,7 +73,7 @@ export function AdminSidebar({ orgSlug, orgName, orgLogo }: AdminSidebarProps) {
             <Link
               key={item.name}
               href={`${basePath}${item.href}`}
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={onNavClick}
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                 active
@@ -101,6 +99,28 @@ export function AdminSidebar({ orgSlug, orgName, orgLogo }: AdminSidebarProps) {
       </div>
     </>
   )
+}
+
+export function AdminSidebar({ orgSlug, orgName, orgLogo }: AdminSidebarProps) {
+  const pathname = usePathname()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const basePath = `/${orgSlug}/admin`
+
+  const isActive = (href: string) => {
+    const fullPath = `${basePath}${href}`
+    if (href === '') {
+      return pathname === basePath || pathname === `${basePath}/`
+    }
+    return pathname.startsWith(fullPath)
+  }
+
+  const sidebarProps = {
+    orgSlug,
+    orgName,
+    orgLogo,
+    basePath,
+    isActive,
+  }
 
   return (
     <>
@@ -111,6 +131,7 @@ export function AdminSidebar({ orgSlug, orgName, orgLogo }: AdminSidebarProps) {
           size="icon"
           className="m-2"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
         >
           {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </Button>
@@ -132,14 +153,14 @@ export function AdminSidebar({ orgSlug, orgName, orgLogo }: AdminSidebarProps) {
         )}
       >
         <div className="flex h-full flex-col">
-          <SidebarContent />
+          <SidebarContent {...sidebarProps} onNavClick={() => setMobileMenuOpen(false)} />
         </div>
       </aside>
 
       {/* Desktop sidebar */}
       <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex h-full flex-col border-r border-gray-200 bg-white">
-          <SidebarContent />
+          <SidebarContent {...sidebarProps} />
         </div>
       </aside>
     </>

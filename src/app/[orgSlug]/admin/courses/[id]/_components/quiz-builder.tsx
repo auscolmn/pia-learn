@@ -106,6 +106,8 @@ export function QuizBuilder({
     setIsLoading(false)
   }, [lessonId, lessonTitle])
 
+  // Load quiz data when dialog opens - this is intentional initialization
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (open) {
       loadQuiz()
@@ -549,6 +551,8 @@ function QuestionEditor({
   const [explanation, setExplanation] = useState('')
   const [points, setPoints] = useState(1)
 
+  // Initialize form state when dialog opens - this is intentional form initialization
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (open && question) {
       setQuestionText(question.question)

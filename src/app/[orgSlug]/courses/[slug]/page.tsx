@@ -302,7 +302,7 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
                 {/* Learning Outcomes */}
                 {course.learning_outcomes && course.learning_outcomes.length > 0 && (
                   <div>
-                    <h2 className="text-2xl font-bold mb-4">What You'll Learn</h2>
+                    <h2 className="text-2xl font-bold mb-4">What You&apos;ll Learn</h2>
                     <ul className="grid md:grid-cols-2 gap-3">
                       {course.learning_outcomes.map((outcome, i) => (
                         <li key={i} className="flex items-start gap-2">
@@ -427,9 +427,9 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
         <div className="container mx-auto text-center text-sm text-muted-foreground">
           <p>
             © {new Date().getFullYear()} {org.name}. Powered by{" "}
-            <a href="/" className="text-primary hover:underline">
+            <Link href="/" className="text-primary hover:underline">
               LearnStudio
-            </a>
+            </Link>
           </p>
         </div>
       </footer>

@@ -171,7 +171,7 @@ export function IssueCertificateDialog({
               }
             />
             <p className="text-xs text-muted-foreground">
-              Leave blank to use the student's profile name
+              Leave blank to use the student&apos;s profile name
             </p>
           </div>
         </div>
